@@ -1,7 +1,7 @@
 import re
 import streamlit as st
-from datetime import datetime
 import base64
+from datetime import datetime, timedelta, timezone
 
 # Настройка страницы
 st.set_page_config(
@@ -365,7 +365,7 @@ def extract_sku_from_text(text):
 
 def create_csv_content(sku_list):
     """Создает содержимое CSV файла"""
-    csv_content = "SKU\n"
+    csv_content = ""
     for sku in sku_list:
         csv_content += f"{sku}\n"
     return csv_content
@@ -395,14 +395,6 @@ def main():
     # Кастомный заголовок
     st.markdown('<h1 class="main-header">🛍️ SKU Extractor</h1>', unsafe_allow_html=True)
     st.markdown('<p class="main-subtitle">Извлекайте SKU из ссылок OZON и любого текста</p>', unsafe_allow_html=True)
-    
-    # Инициализация session state для текстового поля
-    if 'input_text' not in st.session_state:
-        st.session_state.input_text = """https://www.ozon.ru/product/salfetki-ot-pyaten-na-odezhde-vlazhnye-pyatnovyvodyashchie-sredstvo-ochishchayushchie-1650868905/
-https://www.ozon.ru/product/noutbuk-apple-macbook-air-13-m1-8gb-256gb-space-gray-1234567890/
-https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
-
-Товары: 9876543210, 555666777, 8889990001."""
     
     # Сайдбар с карточками
     with st.sidebar:
@@ -488,56 +480,39 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
     with col1:
         st.markdown('<div class="section-header">📥 Ввод данных</div>', unsafe_allow_html=True)
     
-        # Текстовое поле с привязкой к session_state
+            
+    
+        default_text = """https://www.ozon.ru/product/salfetki-ot-pyaten-na-odezhde-vlazhnye-pyatnovyvodyashchie-sredstvo-ochishchayushchie-1650868905/
+https://www.ozon.ru/product/noutbuk-apple-macbook-air-13-m1-8gb-256gb-space-gray-1234567890/
+https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
+
+Товары: 9876543210, 555666777, 8889990001."""
+    
         input_text = st.text_area(
             "",  # Пустой заголовок, т.к. он уже в карточке
-            value=st.session_state.input_text,
+            value=default_text,
             height=280,
             placeholder="Вставьте ваш текст здесь...",
-            label_visibility="collapsed",
-            key="input_text_area"
-        )
+            label_visibility="collapsed"
+     )
         
-        # Обновляем session_state при изменении текста
-        st.session_state.input_text = input_text
+        st.markdown('</div>', unsafe_allow_html=True)
         
-        # Адаптивные кнопки
-        button_col1, button_col2, button_col3 = st.columns(3)
-        
-        with button_col1:
-            extract_btn = st.button("🔍 Извлечь SKU", type="primary", use_container_width=True)
-        with button_col2:
-            clear_btn = st.button("🗑️ Очистить", use_container_width=True)
-        with button_col3:
-            example_btn = st.button("📋 Пример", use_container_width=True)
+        # Одна кнопка "Извлечь SKU"
+        extract_btn = st.button("🔍 Извлечь SKU", type="primary", use_container_width=True)
     
     with col2:
         st.markdown('<div class="section-header">📤 Результаты</div>', unsafe_allow_html=True)
         
-        # Инициализация session state для результатов
+        # Инициализация session state
         if 'sku_list' not in st.session_state:
             st.session_state.sku_list = []
         if 'extraction_stats' not in st.session_state:
             st.session_state.extraction_stats = {"found": 0, "duplicates": 0}
         
-        # Обработка кнопок
-        if clear_btn:
-            st.session_state.sku_list = []
-            st.session_state.extraction_stats = {"found": 0, "duplicates": 0}
-            st.session_state.input_text = ""  # Очищаем текстовое поле
-            st.rerun()
-            
-        if example_btn:
-            st.session_state.input_text = """https://www.ozon.ru/product/salfetki-ot-pyaten-na-odezhde-vlazhnye-pyatnovyvodyashchie-sredstvo-ochishchayushchie-1650868905/
-https://www.ozon.ru/product/noutbuk-apple-macbook-air-13-m1-8gb-256gb-space-gray-1234567890/
-https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
-
-Товары: 9876543210, 555666777, 8889990001."""
-            st.rerun()
-        
         # Обработка извлечения SKU
         if extract_btn:
-            if not st.session_state.input_text.strip():
+            if not input_text.strip():
                 st.markdown("""
                 <div class="alert alert-warning">
                     <strong>⚠️ Внимание</strong><br>
@@ -547,10 +522,10 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
             else:
                 with st.spinner("🔍 Извлекаем SKU..."):
                     try:
-                        sku_list = extract_sku_from_text(st.session_state.input_text)
+                        sku_list = extract_sku_from_text(input_text)
                         
                         # Статистика
-                        original_count = len(re.findall(r'-(\d{9,10})/', st.session_state.input_text)) + len(re.findall(r'(?<!\d)([1-9]\d{8,9})(?!\d)', st.session_state.input_text))
+                        original_count = len(re.findall(r'-(\d{9,10})/', input_text)) + len(re.findall(r'(?<!\d)([1-9]\d{8,9})(?!\d)', input_text))
                         duplicate_count = original_count - len(sku_list)
                         
                         st.session_state.sku_list = sku_list
@@ -567,12 +542,12 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
                         </div>
                         """, unsafe_allow_html=True)
         
-        # Отображение результатов
+       # Отображение результатов
         if st.session_state.sku_list:
             stats = st.session_state.extraction_stats
     
             # Статистика
-            duplicate_info = f'<div class="status-item">♻️ Удалено дубликатов: <strong>{stats["duplicates"]}</strong></div>' if stats['duplicates'] > 0 else ''
+            duplicate_info = f'<div class="status-item">♻️ Удалено дубликатов: <strong>{stats["duplicates"]}</strong></div>' if stats["duplicates"] > 0 else ''
     
             st.markdown(f"""
             <div class="alert alert-success fade-in">
@@ -599,7 +574,7 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
     
             # Скачивание
             if st.session_state.sku_list:
-                timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+                timestamp = (datetime.now() + timedelta(hours=3)).strftime("%d-%m-%Y_%H-%M-%S")
                 filename = f"sku_{timestamp}.csv"
                 st.markdown(get_csv_download_link(st.session_state.sku_list, filename), unsafe_allow_html=True)
 
