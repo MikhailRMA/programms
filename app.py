@@ -43,7 +43,7 @@ st.markdown("""
             --background-color: #1E1E1E;
             --secondary-background-color: #2D2D2D;
             --text-color: #FFFFFF;
-            --text-muted: #CCCCCC;
+            --text-muted: #6b6b6b;
             --border-color: #404040;
             --shadow-color: rgba(0,0,0,0.3);
             --code-background: #2D2D2D;
@@ -93,13 +93,12 @@ st.markdown("""
     /* Базовые стили */
     .main-header {
         font-size: clamp(1.8rem, 5vw, 2.5rem);
-        background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: var(--primary-color);
         text-align: center;
         margin-bottom: clamp(0.5rem, 2vw, 1rem);
         font-weight: 800;
         line-height: 1.2;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .main-subtitle {
@@ -110,14 +109,20 @@ st.markdown("""
         line-height: 1.4;
     }
     
+    /* Заголовки разделов основной области */
     .section-header {
-        font-size: clamp(1.1rem, 3vw, 1.3rem);
+        background: linear-gradient(45deg, #667eea, #764ba2);
         color: var(--primary-color);
-        border-left: 4px solid var(--primary-color);
-        padding-left: clamp(0.8rem, 2vw, 1rem);
+        padding: clamp(0.8rem, 2vw, 1rem) clamp(1rem, 2.5vw, 1.5rem);
+        border-radius: var(--border-radius);
         margin: clamp(0.8rem, 2vw, 1rem) 0 clamp(0.4rem, 1vw, 0.5rem) 0;
-        line-height: 1.3;
+        font-size: clamp(1.1rem, 3vw, 1.3rem);
+        font-weight: 600;
+        text-align: center;
+        box-shadow: 0 2px 8px var(--shadow-color);
     }
+
+    
     
     /* Карточки */
     .card {
@@ -388,8 +393,8 @@ def get_csv_download_link(sku_list, filename):
 
 def main():
     # Кастомный заголовок
-    st.markdown('<h1 class="main-header">🛍️ OZON SKU Extractor</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="main-subtitle">Извлекайте SKU из ссылок OZON и любого текста на любом устройстве</p>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🛍️ SKU Extractor</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="main-subtitle">Извлекайте SKU из ссылок OZON и любого текста</p>', unsafe_allow_html=True)
     
     # Сайдбар с карточками
     with st.sidebar:
@@ -475,20 +480,7 @@ def main():
     with col1:
         st.markdown('<div class="section-header">📥 Ввод данных</div>', unsafe_allow_html=True)
     
-            # Вся карточка в одном HTML блоке
-        st.markdown("""
-        <div class="card fade-in">
-            <div class="card-header">
-                <span class="card-icon">📝</span>
-                <h4 class="card-title">Ввод данных</h4>
-            </div>
-            <div style="padding: 0 0.5rem;">
-                <p style="margin-bottom: 0.5rem; color: var(--text-color); font-size: var(--font-size-sm);">
-                    <strong>Вставьте текст со ссылками OZON или любой текст:</strong>
-                </p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+            
     
         default_text = """https://www.ozon.ru/product/salfetki-ot-pyaten-na-odezhde-vlazhnye-pyatnovyvodyashchie-sredstvo-ochishchayushchie-1650868905/
 https://www.ozon.ru/product/noutbuk-apple-macbook-air-13-m1-8gb-256gb-space-gray-1234567890/
