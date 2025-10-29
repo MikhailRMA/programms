@@ -1,10 +1,8 @@
 import re
-import os
-import pandas as pd
 import streamlit as st
 from datetime import datetime
 import base64
-from io import StringIO
+import io
 
 # Настройка страницы
 st.set_page_config(
@@ -43,10 +41,17 @@ def extract_sku_from_text(text):
     unique_sku.sort()
     return unique_sku
 
-def get_csv_download_link(df, filename):
+def create_csv_content(sku_list):
+    """Создает содержимое CSV файла"""
+    csv_content = "SKU\n"  # Заголовок
+    for sku in sku_list:
+        csv_content += f"{sku}\n"
+    return csv_content
+
+def get_csv_download_link(sku_list, filename):
     """Генерирует ссылку для скачивания CSV файла"""
-    csv = df.to_csv(index=False, encoding='utf-8-sig')
-    b64 = base64.b64encode(csv.encode()).decode()
+    csv_content = create_csv_content(sku_list)
+    b64 = base64.b64encode(csv_content.encode()).decode()
     href = f'<a href="data:file/csv;base64,{b64}" download="{filename}">📥 Скачать CSV файл</a>'
     return href
 
@@ -109,7 +114,7 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/?param=value
             clear_btn = st.button("🗑️ Очистить", use_container_width=True)
         with col1_3:
             if st.button("📋 Пример", use_container_width=True):
-                st.experimental_rerun()
+                st.rerun()
     
     with col2:
         st.subheader("📤 Результаты")
@@ -124,7 +129,7 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/?param=value
         if clear_btn:
             st.session_state.sku_list = []
             st.session_state.extraction_stats = {"found": 0, "duplicates": 0}
-            st.experimental_rerun()
+            st.rerun()
         
         # Обработка извлечения SKU
         if extract_btn and input_text.strip():
@@ -155,24 +160,25 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/?param=value
             
             # Поле с результатами
             result_text = "\n".join(st.session_state.sku_list)
-            st.text_area("Найденные SKU:", value=result_text, height=200)
+            st.text_area("Найденные SKU:", value=result_text, height=200, key="results")
             
             # Кнопка скачивания
             st.markdown("---")
             st.subheader("💾 Сохранение результатов")
             
             if st.session_state.sku_list:
-                # Создаем DataFrame для скачивания
-                df = pd.DataFrame(st.session_state.sku_list, columns=["SKU"])
                 timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
                 filename = f"sku_{timestamp}.csv"
                 
                 # Ссылка для скачивания
-                st.markdown(get_csv_download_link(df, filename), unsafe_allow_html=True)
+                st.markdown(get_csv_download_link(st.session_state.sku_list, filename), unsafe_allow_html=True)
                 
-                # Предпросмотр таблицы
+                # Предпросмотр данных
                 st.markdown("**Предпросмотр данных:**")
-                st.dataframe(df, use_container_width=True)
+                for i, sku in enumerate(st.session_state.sku_list[:10]):  # Показываем первые 10
+                    st.text(f"{i+1}. {sku}")
+                if len(st.session_state.sku_list) > 10:
+                    st.text(f"... и еще {len(st.session_state.sku_list) - 10} SKU")
         
         else:
             if extract_btn and not input_text.strip():
