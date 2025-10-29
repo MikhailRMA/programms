@@ -396,6 +396,14 @@ def main():
     st.markdown('<h1 class="main-header">🛍️ SKU Extractor</h1>', unsafe_allow_html=True)
     st.markdown('<p class="main-subtitle">Извлекайте SKU из ссылок OZON и любого текста</p>', unsafe_allow_html=True)
     
+    # Инициализация session state для текстового поля
+    if 'input_text' not in st.session_state:
+        st.session_state.input_text = """https://www.ozon.ru/product/salfetki-ot-pyaten-na-odezhde-vlazhnye-pyatnovyvodyashchie-sredstvo-ochishchayushchie-1650868905/
+https://www.ozon.ru/product/noutbuk-apple-macbook-air-13-m1-8gb-256gb-space-gray-1234567890/
+https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
+
+Товары: 9876543210, 555666777, 8889990001."""
+    
     # Сайдбар с карточками
     with st.sidebar:
         st.markdown("""
@@ -480,23 +488,18 @@ def main():
     with col1:
         st.markdown('<div class="section-header">📥 Ввод данных</div>', unsafe_allow_html=True)
     
-            
-    
-        default_text = """https://www.ozon.ru/product/salfetki-ot-pyaten-na-odezhde-vlazhnye-pyatnovyvodyashchie-sredstvo-ochishchayushchie-1650868905/
-https://www.ozon.ru/product/noutbuk-apple-macbook-air-13-m1-8gb-256gb-space-gray-1234567890/
-https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
-
-Товары: 9876543210, 555666777, 8889990001."""
-    
+        # Текстовое поле с привязкой к session_state
         input_text = st.text_area(
             "",  # Пустой заголовок, т.к. он уже в карточке
-            value=default_text,
+            value=st.session_state.input_text,
             height=280,
             placeholder="Вставьте ваш текст здесь...",
-            label_visibility="collapsed"
-     )
+            label_visibility="collapsed",
+            key="input_text_area"
+        )
         
-        st.markdown('</div>', unsafe_allow_html=True)
+        # Обновляем session_state при изменении текста
+        st.session_state.input_text = input_text
         
         # Адаптивные кнопки
         button_col1, button_col2, button_col3 = st.columns(3)
@@ -511,7 +514,7 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
     with col2:
         st.markdown('<div class="section-header">📤 Результаты</div>', unsafe_allow_html=True)
         
-        # Инициализация session state
+        # Инициализация session state для результатов
         if 'sku_list' not in st.session_state:
             st.session_state.sku_list = []
         if 'extraction_stats' not in st.session_state:
@@ -521,14 +524,20 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
         if clear_btn:
             st.session_state.sku_list = []
             st.session_state.extraction_stats = {"found": 0, "duplicates": 0}
+            st.session_state.input_text = ""  # Очищаем текстовое поле
             st.rerun()
             
         if example_btn:
+            st.session_state.input_text = """https://www.ozon.ru/product/salfetki-ot-pyaten-na-odezhde-vlazhnye-pyatnovyvodyashchie-sredstvo-ochishchayushchie-1650868905/
+https://www.ozon.ru/product/noutbuk-apple-macbook-air-13-m1-8gb-256gb-space-gray-1234567890/
+https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
+
+Товары: 9876543210, 555666777, 8889990001."""
             st.rerun()
         
         # Обработка извлечения SKU
         if extract_btn:
-            if not input_text.strip():
+            if not st.session_state.input_text.strip():
                 st.markdown("""
                 <div class="alert alert-warning">
                     <strong>⚠️ Внимание</strong><br>
@@ -538,10 +547,10 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
             else:
                 with st.spinner("🔍 Извлекаем SKU..."):
                     try:
-                        sku_list = extract_sku_from_text(input_text)
+                        sku_list = extract_sku_from_text(st.session_state.input_text)
                         
                         # Статистика
-                        original_count = len(re.findall(r'-(\d{9,10})/', input_text)) + len(re.findall(r'(?<!\d)([1-9]\d{8,9})(?!\d)', input_text))
+                        original_count = len(re.findall(r'-(\d{9,10})/', st.session_state.input_text)) + len(re.findall(r'(?<!\d)([1-9]\d{8,9})(?!\d)', st.session_state.input_text))
                         duplicate_count = original_count - len(sku_list)
                         
                         st.session_state.sku_list = sku_list
@@ -558,7 +567,7 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
                         </div>
                         """, unsafe_allow_html=True)
         
-       # Отображение результатов
+        # Отображение результатов
         if st.session_state.sku_list:
             stats = st.session_state.extraction_stats
     
@@ -575,7 +584,7 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
              </div>
             """, unsafe_allow_html=True)
     
-            # Карточка с результатами - ВАРИАНТ 3 (рекомендуемый)
+            # Карточка с результатами
             st.markdown("""
             <div class="card fade-in">
                 <div class="card-header">
