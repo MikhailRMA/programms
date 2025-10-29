@@ -401,7 +401,7 @@ def extract_sku_from_text(text):
 
 def create_csv_content(sku_list):
     """Создает содержимое CSV файла"""
-    csv_content = "SKU\n"
+    csv_content = ""
     for sku in sku_list:
         csv_content += f"{sku}\n"
     return csv_content
