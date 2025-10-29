@@ -12,6 +12,7 @@ st.set_page_config(
 )
 
 # Кастомный CSS
+# Кастомный CSS с адаптацией под тему
 st.markdown("""
 <style>
     /* Основные стили */
@@ -27,20 +28,21 @@ st.markdown("""
     
     .subheader {
         font-size: 1.3rem;
-        color: #2E86AB;
-        border-left: 4px solid #2E86AB;
+        color: var(--primary-color);
+        border-left: 4px solid var(--primary-color);
         padding-left: 1rem;
         margin: 1rem 0 0.5rem 0;
     }
     
-    /* Карточки */
+    /* Карточки - адаптивные */
     .card {
-        background: white;
+        background: var(--background-color);
         padding: 1.2rem;
         border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 10px var(--shadow-color);
+        border: 1px solid var(--border-color);
         margin: 0.8rem 0;
+        color: var(--text-color);
     }
     
     /* Кнопки */
@@ -63,15 +65,41 @@ st.markdown("""
     /* Текстовые поля */
     .stTextArea textarea {
         border-radius: 8px;
-        border: 2px solid #e0e0e0;
+        border: 2px solid var(--border-color);
         padding: 0.8rem;
         font-family: 'Consolas', monospace;
         font-size: 0.9rem;
+        background: var(--background-color);
+        color: var(--text-color);
     }
     
     .stTextArea textarea:focus {
         border-color: #667eea;
         box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+    }
+    
+    /* Status Item - АДАПТИВНЫЙ */
+    .status-item {
+        background: var(--secondary-background-color);
+        padding: 0.8rem;
+        border-radius: 8px;
+        margin: 0.5rem 0;
+        border-left: 4px solid var(--primary-color);
+        color: var(--text-color);
+        font-size: 0.95rem;
+    }
+    
+    .status-item strong {
+        color: var(--primary-color);
+    }
+    
+    .status-item code {
+        background: var(--code-background);
+        color: var(--code-color);
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-family: 'Consolas', monospace;
+        font-size: 0.85rem;
     }
     
     /* Уведомления */
@@ -130,16 +158,40 @@ st.markdown("""
     .fade-in {
         animation: fadeIn 0.3s ease-in;
     }
-    
-    /* Статус */
-    .status-item {
-        background: #f8f9fa;
-        padding: 0.5rem;
-        border-radius: 6px;
-        margin: 0.3rem 0;
-        border-left: 3px solid #667eea;
-    }
 </style>
+
+<script>
+// JavaScript для определения темы и применения CSS переменных
+function updateTheme() {
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (isDark) {
+        // Темная тема
+        document.documentElement.style.setProperty('--primary-color', '#4ECDC4');
+        document.documentElement.style.setProperty('--background-color', '#1E1E1E');
+        document.documentElement.style.setProperty('--secondary-background-color', '#2D2D2D');
+        document.documentElement.style.setProperty('--text-color', '#FFFFFF');
+        document.documentElement.style.setProperty('--border-color', '#404040');
+        document.documentElement.style.setProperty('--shadow-color', 'rgba(0,0,0,0.3)');
+        document.documentElement.style.setProperty('--code-background', '#2D2D2D');
+        document.documentElement.style.setProperty('--code-color', '#4ECDC4');
+    } else {
+        // Светлая тема
+        document.documentElement.style.setProperty('--primary-color', '#2E86AB');
+        document.documentElement.style.setProperty('--background-color', '#FFFFFF');
+        document.documentElement.style.setProperty('--secondary-background-color', '#F8F9FA');
+        document.documentElement.style.setProperty('--text-color', '#333333');
+        document.documentElement.style.setProperty('--border-color', '#E0E0E0');
+        document.documentElement.style.setProperty('--shadow-color', 'rgba(0,0,0,0.1)');
+        document.documentElement.style.setProperty('--code-background', '#F1F3F4');
+        document.documentElement.style.setProperty('--code-color', '#D32F2F');
+    }
+}
+
+// Применяем тему при загрузке и при изменении
+updateTheme();
+window.matchMedia('(prefers-color-scheme: dark)').addListener(updateTheme);
+</script>
 """, unsafe_allow_html=True)
 
 def extract_sku_from_text(text):
