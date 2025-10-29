@@ -11,82 +11,161 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Кастомный CSS
-# Кастомный CSS с адаптацией под тему
+# Полностью адаптивный CSS
 st.markdown("""
 <style>
-    /* Основные стили */
+    /* CSS переменные для адаптации */
+    :root {
+        --primary-color: #2E86AB;
+        --secondary-color: #4ECDC4;
+        --background-color: #FFFFFF;
+        --secondary-background-color: #F8F9FA;
+        --text-color: #333333;
+        --text-muted: #666666;
+        --border-color: #E0E0E0;
+        --shadow-color: rgba(0,0,0,0.1);
+        --code-background: #F1F3F4;
+        --code-color: #D32F2F;
+        --success-color: #56ab2f;
+        --error-color: #ff6b6b;
+        --card-padding: 1.2rem;
+        --font-size-base: 1rem;
+        --font-size-sm: 0.9rem;
+        --font-size-lg: 1.1rem;
+        --border-radius: 12px;
+    }
+    
+    /* Темная тема */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --primary-color: #4ECDC4;
+            --secondary-color: #FF6B6B;
+            --background-color: #1E1E1E;
+            --secondary-background-color: #2D2D2D;
+            --text-color: #FFFFFF;
+            --text-muted: #CCCCCC;
+            --border-color: #404040;
+            --shadow-color: rgba(0,0,0,0.3);
+            --code-background: #2D2D2D;
+            --code-color: #4ECDC4;
+            --success-color: #a8e063;
+            --error-color: #ff8e8e;
+        }
+    }
+    
+    /* Адаптация для планшетов */
+    @media (max-width: 1024px) {
+        :root {
+            --card-padding: 1rem;
+            --font-size-base: 0.95rem;
+        }
+    }
+    
+    /* Адаптация для мобильных устройств */
+    @media (max-width: 768px) {
+        :root {
+            --card-padding: 0.9rem;
+            --font-size-base: 0.9rem;
+            --font-size-sm: 0.85rem;
+            --border-radius: 10px;
+        }
+    }
+    
+    /* Адаптация для очень маленьких экранов */
+    @media (max-width: 480px) {
+        :root {
+            --card-padding: 0.8rem;
+            --font-size-base: 0.85rem;
+            --font-size-sm: 0.8rem;
+            --border-radius: 8px;
+        }
+    }
+    
+    /* Для очень больших экранов (32+ дюймов) */
+    @media (min-width: 1920px) {
+        :root {
+            --card-padding: 1.5rem;
+            --font-size-base: 1.1rem;
+            --font-size-lg: 1.3rem;
+        }
+    }
+    
+    /* Базовые стили */
     .main-header {
-        font-size: 2.5rem;
-        background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
+        background: linear-gradient(45deg, var(--secondary-color), var(--primary-color));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         text-align: center;
-        margin-bottom: 1rem;
+        margin-bottom: clamp(0.5rem, 2vw, 1rem);
         font-weight: 800;
+        line-height: 1.2;
     }
     
-    .subheader {
-        font-size: 1.3rem;
+    .main-subtitle {
+        text-align: center;
+        color: var(--text-muted);
+        margin-bottom: clamp(1rem, 3vw, 2rem);
+        font-size: var(--font-size-base);
+        line-height: 1.4;
+    }
+    
+    .section-header {
+        font-size: clamp(1.1rem, 3vw, 1.3rem);
         color: var(--primary-color);
         border-left: 4px solid var(--primary-color);
-        padding-left: 1rem;
-        margin: 1rem 0 0.5rem 0;
+        padding-left: clamp(0.8rem, 2vw, 1rem);
+        margin: clamp(0.8rem, 2vw, 1rem) 0 clamp(0.4rem, 1vw, 0.5rem) 0;
+        line-height: 1.3;
     }
     
-    /* Карточки - адаптивные */
+    /* Карточки */
     .card {
         background: var(--background-color);
-        padding: 1.2rem;
-        border-radius: 12px;
-        box-shadow: 0 2px 10px var(--shadow-color);
+        padding: var(--card-padding);
+        border-radius: var(--border-radius);
+        box-shadow: 0 2px 12px var(--shadow-color);
         border: 1px solid var(--border-color);
-        margin: 0.8rem 0;
+        margin: clamp(0.5rem, 1.5vw, 0.8rem) 0;
         color: var(--text-color);
-    }
-    
-    /* Кнопки */
-    .stButton button {
-        background: linear-gradient(45deg, #667eea, #764ba2);
-        color: white;
-        border: none;
-        padding: 0.6rem 1.2rem;
-        border-radius: 8px;
-        font-weight: 600;
+        font-size: var(--font-size-base);
         transition: all 0.3s ease;
-        width: 100%;
     }
     
-    .stButton button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    .card:hover {
+        box-shadow: 0 4px 20px var(--shadow-color);
     }
     
-    /* Текстовые поля */
-    .stTextArea textarea {
-        border-radius: 8px;
-        border: 2px solid var(--border-color);
-        padding: 0.8rem;
-        font-family: 'Consolas', monospace;
-        font-size: 0.9rem;
-        background: var(--background-color);
-        color: var(--text-color);
+    .card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.8rem;
+        gap: 0.5rem;
     }
     
-    .stTextArea textarea:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+    .card-icon {
+        font-size: 1.3em;
     }
     
-    /* Status Item - АДАПТИВНЫЙ */
+    .card-title {
+        margin: 0;
+        color: var(--primary-color);
+        font-size: var(--font-size-base);
+        font-weight: 600;
+    }
+    
+    /* Status Item */
     .status-item {
         background: var(--secondary-background-color);
-        padding: 0.8rem;
+        padding: clamp(0.6rem, 1.5vw, 0.8rem);
         border-radius: 8px;
-        margin: 0.5rem 0;
+        margin: clamp(0.3rem, 1vw, 0.5rem) 0;
         border-left: 4px solid var(--primary-color);
         color: var(--text-color);
-        font-size: 0.95rem;
+        font-size: var(--font-size-sm);
+        line-height: 1.4;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
     
     .status-item strong {
@@ -96,108 +175,161 @@ st.markdown("""
     .status-item code {
         background: var(--code-background);
         color: var(--code-color);
-        padding: 0.2rem 0.4rem;
+        padding: 0.1rem 0.3rem;
         border-radius: 4px;
-        font-family: 'Consolas', monospace;
-        font-size: 0.85rem;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 0.85em;
+        word-break: break-word;
+    }
+    
+    /* Кнопки */
+    .stButton button {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: clamp(0.5rem, 1.5vw, 0.6rem) clamp(1rem, 2.5vw, 1.2rem);
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        width: 100%;
+        font-size: var(--font-size-base);
+        min-height: 44px;
+    }
+    
+    .stButton button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* Текстовые поля */
+    .stTextArea textarea {
+        border-radius: 8px;
+        border: 2px solid var(--border-color);
+        padding: clamp(0.6rem, 1.5vw, 0.8rem);
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: var(--font-size-sm);
+        background: var(--background-color);
+        color: var(--text-color);
+        min-height: 150px;
+        resize: vertical;
+        transition: all 0.3s ease;
+    }
+    
+    .stTextArea textarea:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.1);
     }
     
     /* Уведомления */
-    .success-box {
-        background: linear-gradient(45deg, #56ab2f, #a8e063);
-        color: white;
-        padding: 0.8rem;
+    .alert {
+        padding: clamp(0.6rem, 1.5vw, 0.8rem);
         border-radius: 8px;
-        margin: 0.8rem 0;
+        margin: clamp(0.5rem, 1.5vw, 0.8rem) 0;
+        font-size: var(--font-size-base);
+        line-height: 1.4;
     }
     
-    .info-box {
+    .alert-success {
+        background: linear-gradient(45deg, var(--success-color), #a8e063);
+        color: white;
+    }
+    
+    .alert-info {
         background: linear-gradient(45deg, #4facfe, #00f2fe);
         color: white;
-        padding: 0.8rem;
-        border-radius: 8px;
-        margin: 0.8rem 0;
     }
     
-    .warning-box {
+    .alert-warning {
         background: linear-gradient(45deg, #f7971e, #ffd200);
         color: white;
-        padding: 0.8rem;
-        border-radius: 8px;
-        margin: 0.8rem 0;
+    }
+    
+    .alert-error {
+        background: linear-gradient(45deg, var(--error-color), #ff8e8e);
+        color: white;
     }
     
     /* Ссылки для скачивания */
     .download-link {
-        display: inline-block;
-        background: linear-gradient(45deg, #56ab2f, #a8e063);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(45deg, var(--success-color), #a8e063);
         color: white;
-        padding: 10px 20px;
+        padding: clamp(8px, 2vw, 10px) clamp(16px, 3vw, 20px);
         text-decoration: none;
-        border-radius: 6px;
+        border-radius: 8px;
         font-weight: bold;
         margin: 8px 0;
+        font-size: var(--font-size-base);
+        min-height: 44px;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
         text-align: center;
+    }
+    
+    .download-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(86, 171, 47, 0.4);
     }
     
     /* Сайдбар */
     .sidebar-header {
         background: linear-gradient(45deg, #667eea, #764ba2);
         color: white;
-        padding: 1.5rem;
-        border-radius: 12px;
+        padding: clamp(1rem, 2.5vw, 1.5rem);
+        border-radius: var(--border-radius);
         margin-bottom: 1rem;
+        text-align: center;
+    }
+    
+    .sidebar-title {
+        color: white;
+        margin: 0;
+        font-size: var(--font-size-lg);
+        font-weight: 600;
     }
     
     /* Анимации */
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
+        from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
     }
     
     .fade-in {
-        animation: fadeIn 0.3s ease-in;
+        animation: fadeIn 0.4s ease-out;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+    
+    /* Утилиты */
+    .text-center { text-align: center; }
+    .text-success { color: var(--success-color); }
+    .text-error { color: var(--error-color); }
+    .mb-1 { margin-bottom: 0.5rem; }
+    .mb-2 { margin-bottom: 1rem; }
+    
+    /* Специальные стили для очень маленьких экранов */
+    @media (max-width: 360px) {
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.3rem;
+        }
     }
 </style>
-
-<script>
-// JavaScript для определения темы и применения CSS переменных
-function updateTheme() {
-    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (isDark) {
-        // Темная тема
-        document.documentElement.style.setProperty('--primary-color', '#4ECDC4');
-        document.documentElement.style.setProperty('--background-color', '#1E1E1E');
-        document.documentElement.style.setProperty('--secondary-background-color', '#2D2D2D');
-        document.documentElement.style.setProperty('--text-color', '#FFFFFF');
-        document.documentElement.style.setProperty('--border-color', '#404040');
-        document.documentElement.style.setProperty('--shadow-color', 'rgba(0,0,0,0.3)');
-        document.documentElement.style.setProperty('--code-background', '#2D2D2D');
-        document.documentElement.style.setProperty('--code-color', '#4ECDC4');
-    } else {
-        // Светлая тема
-        document.documentElement.style.setProperty('--primary-color', '#2E86AB');
-        document.documentElement.style.setProperty('--background-color', '#FFFFFF');
-        document.documentElement.style.setProperty('--secondary-background-color', '#F8F9FA');
-        document.documentElement.style.setProperty('--text-color', '#333333');
-        document.documentElement.style.setProperty('--border-color', '#E0E0E0');
-        document.documentElement.style.setProperty('--shadow-color', 'rgba(0,0,0,0.1)');
-        document.documentElement.style.setProperty('--code-background', '#F1F3F4');
-        document.documentElement.style.setProperty('--code-color', '#D32F2F');
-    }
-}
-
-// Применяем тему при загрузке и при изменении
-updateTheme();
-window.matchMedia('(prefers-color-scheme: dark)').addListener(updateTheme);
-</script>
 """, unsafe_allow_html=True)
 
 def extract_sku_from_text(text):
-    """
-    Извлекает SKU из текста. SKU должны быть 9 или 10 цифр, не начинаться с 0
-    """
+    """Извлекает SKU из текста"""
     try:
         # Ищем SKU в ссылках (между '-' и '/')
         pattern_links = r'-(\d{9,10})/'
@@ -215,7 +347,6 @@ def extract_sku_from_text(text):
         seen_sku = set()
         
         for sku in all_sku:
-            # Проверяем, что SKU состоит только из цифр и не был добавлен ранее
             if sku.isdigit() and sku not in seen_sku:
                 unique_sku.append(sku)
                 seen_sku.add(sku)
@@ -229,7 +360,7 @@ def extract_sku_from_text(text):
 
 def create_csv_content(sku_list):
     """Создает содержимое CSV файла"""
-    csv_content = "SKU\n"  # Заголовок
+    csv_content = "SKU\n"
     for sku in sku_list:
         csv_content += f"{sku}\n"
     return csv_content
@@ -241,11 +372,14 @@ def get_csv_download_link(sku_list, filename):
     
     href = f'''
     <div class="card fade-in">
-        <h4>📊 Результаты готовы!</h4>
-        <div style="margin: 0.5rem 0;">
-            <div class="status-item">✅ Найдено SKU: <strong>{len(sku_list)}</strong></div>
+        <div class="card-header">
+            <span class="card-icon">📊</span>
+            <h4 class="card-title">Результаты готовы!</h4>
         </div>
-        <a class="download-link" href="data:file/csv;base64,{b64}" download="{filename}">
+        <div class="status-item text-success">
+            ✅ Успешно извлечено SKU: <strong>{len(sku_list)}</strong>
+        </div>
+        <a class="download-link pulse" href="data:file/csv;base64,{b64}" download="{filename}">
             📥 Скачать CSV файл
         </a>
     </div>
@@ -255,23 +389,25 @@ def get_csv_download_link(sku_list, filename):
 def main():
     # Кастомный заголовок
     st.markdown('<h1 class="main-header">🛍️ OZON SKU Extractor</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="main-subtitle">Извлекайте SKU из ссылок OZON и любого текста на любом устройстве</p>', unsafe_allow_html=True)
     
-    # Краткое описание
-    st.markdown('<p style="text-align: center; color: #666; margin-bottom: 2rem;">Извлекайте SKU из ссылок OZON и любого текста</p>', unsafe_allow_html=True)
-    
-    # Сайдбар с улучшенным дизайном
+    # Сайдбар с карточками
     with st.sidebar:
         st.markdown("""
-        <div class="sidebar-header">
-            <h3 style="color: white; margin: 0;">ℹ️ Информация</h3>
+        <div class="sidebar-header fade-in">
+            <h3 class="sidebar-title">ℹ️ Информация</h3>
         </div>
         """, unsafe_allow_html=True)
         
+        # Карточка "Формат SKU"
         st.markdown("""
-        <div class="card">
-            <h4>📝 Формат SKU</h4>
+        <div class="card fade-in">
+            <div class="card-header">
+                <span class="card-icon">📝</span>
+                <h4 class="card-title">Формат SKU</h4>
+            </div>
             <div class="status-item">
-                <strong>Из ссылок:</strong><br>
+                <strong>Из ссылок OZON:</strong><br>
                 <code>...-1650868905/...</code>
             </div>
             <div class="status-item">
@@ -281,22 +417,35 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
+        # Карточка "Примеры SKU"
         st.markdown("""
-        <div class="card">
-            <h4>💡 Примеры SKU</h4>
-            <div style="font-family: monospace; font-size: 0.8rem;">
-                ✅ 1650868905<br>
-                ✅ 123456789<br>
-                ✅ 9876543210<br>
-                ❌ 012345678<br>
-                ❌ 12345678<br>
+        <div class="card fade-in">
+            <div class="card-header">
+                <span class="card-icon">💡</span>
+                <h4 class="card-title">Примеры SKU</h4>
+            </div>
+            <div class="status-item text-success">
+                <strong>✅ Валидные:</strong><br>
+                <code>1650868905</code><br>
+                <code>123456789</code><br>
+                <code>9876543210</code>
+            </div>
+            <div class="status-item text-error">
+                <strong>❌ Невалидные:</strong><br>
+                <code>012345678</code> (0 в начале)<br>
+                <code>12345678</code> (мало цифр)<br>
+                <code>12345678901</code> (много цифр)
             </div>
         </div>
         """, unsafe_allow_html=True)
         
+        # Карточка "Быстрые клавиши"
         st.markdown("""
-        <div class="card">
-            <h4>🚀 Быстрые клавиши</h4>
+        <div class="card fade-in">
+            <div class="card-header">
+                <span class="card-icon">🚀</span>
+                <h4 class="card-title">Быстрые клавиши</h4>
+            </div>
             <div class="status-item">
                 <strong>Ctrl+A</strong> - Выделить все
             </div>
@@ -306,53 +455,69 @@ def main():
             <div class="status-item">
                 <strong>Ctrl+V</strong> - Вставить
             </div>
+            <div class="status-item">
+                <strong>Ctrl+Z</strong> - Отменить
+            </div>
         </div>
         """, unsafe_allow_html=True)
         
         st.markdown("---")
         st.markdown("""
-        <div style="text-align: center; color: #666; padding: 1rem;">
+        <div class="text-center" style="color: var(--text-muted); padding: 1rem;">
             <p>With ❤️ by <strong>mroshchupkin and DS</strong></p>
         </div>
         """, unsafe_allow_html=True)
     
-    # Основная область в колонках
-    col1, col2 = st.columns([1, 1])
+    # Адаптивная основная область
+    # На мобильных - одна колонка, на десктопе - две
+    col1, col2 = st.columns([1, 1], gap="medium")
     
     with col1:
-        st.markdown('<div class="subheader">📥 Ввод данных</div>', unsafe_allow_html=True)
-        
-        # Карточка для ввода данных
-        st.markdown('<div class="card fade-in">', unsafe_allow_html=True)
-        
+        st.markdown('<div class="section-header">📥 Ввод данных</div>', unsafe_allow_html=True)
+    
+            # Вся карточка в одном HTML блоке
+        st.markdown("""
+        <div class="card fade-in">
+            <div class="card-header">
+                <span class="card-icon">📝</span>
+                <h4 class="card-title">Ввод данных</h4>
+            </div>
+            <div style="padding: 0 0.5rem;">
+                <p style="margin-bottom: 0.5rem; color: var(--text-color); font-size: var(--font-size-sm);">
+                    <strong>Вставьте текст со ссылками OZON или любой текст:</strong>
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
         default_text = """https://www.ozon.ru/product/salfetki-ot-pyaten-na-odezhde-vlazhnye-pyatnovyvodyashchie-sredstvo-ochishchayushchie-1650868905/
 https://www.ozon.ru/product/noutbuk-apple-macbook-air-13-m1-8gb-256gb-space-gray-1234567890/
 https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
 
-Заказ 123456789, товары: 9876543210, 555666777."""
-        
+Товары: 9876543210, 555666777, 8889990001."""
+    
         input_text = st.text_area(
-            "**Вставьте текст со ссылками OZON или любой текст:**",
+            "",  # Пустой заголовок, т.к. он уже в карточке
             value=default_text,
-            height=250,
+            height=280,
             placeholder="Вставьте ваш текст здесь...",
             label_visibility="collapsed"
-        )
+     )
         
         st.markdown('</div>', unsafe_allow_html=True)
         
-        # Кнопки действий
-        col_btn1, col_btn2, col_btn3 = st.columns(3)
+        # Адаптивные кнопки
+        button_col1, button_col2, button_col3 = st.columns(3)
         
-        with col_btn1:
+        with button_col1:
             extract_btn = st.button("🔍 Извлечь SKU", type="primary", use_container_width=True)
-        with col_btn2:
+        with button_col2:
             clear_btn = st.button("🗑️ Очистить", use_container_width=True)
-        with col_btn3:
+        with button_col3:
             example_btn = st.button("📋 Пример", use_container_width=True)
     
     with col2:
-        st.markdown('<div class="subheader">📤 Результаты</div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-header">📤 Результаты</div>', unsafe_allow_html=True)
         
         # Инициализация session state
         if 'sku_list' not in st.session_state:
@@ -373,9 +538,9 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
         if extract_btn:
             if not input_text.strip():
                 st.markdown("""
-                <div class="warning-box">
-                    <h4>⚠️ Внимание</h4>
-                    <p>Введите текст для извлечения SKU</p>
+                <div class="alert alert-warning">
+                    <strong>⚠️ Внимание</strong><br>
+                    Введите текст для извлечения SKU
                 </div>
                 """, unsafe_allow_html=True)
             else:
@@ -394,59 +559,68 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
                         }
                         
                     except Exception as e:
-                        st.error(f"❌ Ошибка при извлечении SKU: {str(e)}")
+                        st.markdown(f"""
+                        <div class="alert alert-error">
+                            <strong>❌ Ошибка</strong><br>
+                            {str(e)}
+                        </div>
+                        """, unsafe_allow_html=True)
         
-        # Отображение результатов
+       # Отображение результатов
         if st.session_state.sku_list:
             stats = st.session_state.extraction_stats
-            
+    
             # Статистика
+            duplicate_info = f'<div class="status-item">♻️ Удалено дубликатов: <strong>{stats["duplicates"]}</strong></div>' if stats['duplicates'] > 0 else ''
+    
             st.markdown(f"""
-            <div class="success-box fade-in">
-                <h4>✅ Успешно извлечено!</h4>
-                <div class="status-item">Найдено SKU: <strong>{stats['found']}</strong></div>
-                {f'<div class="status-item">Удалено дубликатов: <strong>{stats["duplicates"]}</strong></div>' if stats['duplicates'] > 0 else ''}
+            <div class="alert alert-success fade-in">
+                <strong>✅ Успешно извлечено!</strong><br>
+                <div class="status-item" style="background: transparent; border: none; padding: 0.5rem 0;">
+                    Найдено SKU: <strong>{stats['found']}</strong>
+                </div>
+                {duplicate_info}
+             </div>
+            """, unsafe_allow_html=True)
+    
+            # Карточка с результатами - ВАРИАНТ 3 (рекомендуемый)
+            st.markdown("""
+            <div class="card fade-in">
+                <div class="card-header">
+                    <span class="card-icon">📋</span>
+                    <h4 class="card-title">Найденные SKU</h4>
+                </div>
             </div>
             """, unsafe_allow_html=True)
-            
-            # Карточка с результатами
-            st.markdown('<div class="card fade-in">', unsafe_allow_html=True)
+    
             result_text = "\n".join(st.session_state.sku_list)
-            st.text_area("**Найденные SKU:**", value=result_text, height=180, key="results")
-            st.markdown('</div>')
-            
+            st.text_area("**Список извлеченных SKU:**", value=result_text, height=200, key="results", label_visibility="collapsed")
+    
             # Скачивание
             if st.session_state.sku_list:
                 timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
                 filename = f"sku_{timestamp}.csv"
                 st.markdown(get_csv_download_link(st.session_state.sku_list, filename), unsafe_allow_html=True)
-        
-        else:
-            if not extract_btn:
-                st.markdown("""
-                <div class="info-box">
-                    <h4>👆 Готов к работе</h4>
-                    <p>Введите текст и нажмите "Извлечь SKU"</p>
-                </div>
-                """, unsafe_allow_html=True)
 
     # Дополнительная информация
-    with st.expander("📊 Подробнее о работе приложения"):
+    with st.expander("📊 Подробнее о работе приложения", expanded=False):
+        st.markdown("#### 🔧 Как работает извлечение")
+    
         st.markdown("""
-        <div class="card">
-            <h4>🔧 Как работает извлечение</h4>
-            <div class="status-item">
-                <strong>Из ссылок OZON:</strong> ищет паттерн <code>-1650868905/</code> в URL
-            </div>
-            <div class="status-item">
-                <strong>Из текста:</strong> находит числа 9-10 цифр, не начинающиеся с 0
-            </div>
-            
-            <h4>🔄 Обработка данных</h4>
-            <div class="status-item">Автоматическое удаление дубликатов</div>
-            <div class="status-item">Сортировка SKU по возрастанию</div>
-            <div class="status-item">Валидация формата чисел</div>
+        <div class="status-item">
+            <strong>📎 Из ссылок OZON:</strong> ищет паттерн <code>-1650868905/</code> в URL
         </div>
+        <div class="status-item">
+            <strong>📝 Из текста:</strong> находит числа 9-10 цифр, не начинающиеся с 0
+        </div>
+        """, unsafe_allow_html=True)
+    
+        st.markdown("#### 🔄 Обработка данных")
+    
+        st.markdown("""
+        <div class="status-item">✅ <strong>Автоматическое удаление дубликатов</strong> - убирает повторяющиеся SKU</div>
+        <div class="status-item">📊 <strong>Сортировка по возрастанию</strong> - упорядочивает SKU для удобства</div>
+        <div class="status-item">🔍 <strong>Валидация формата</strong> - проверяет что SKU соответствуют требованиям</div>
         """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
