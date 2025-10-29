@@ -295,6 +295,7 @@ st.markdown("""
         border: none;
         width: 100%;
     }
+            
 
     .ozon-download:hover {
         background: #e0104a !important;
