@@ -6,7 +6,7 @@ import base64
 # Настройка страницы
 st.set_page_config(
     page_title="OZON SKU Extractor",
-    page_icon="🛍️",
+    page_icon="https://cdn1.ozone.ru/s3/common-image-storage/bx/box-open-ozon-alt_m.png",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -35,6 +35,7 @@ st.markdown("""
         --ozon-font-size-lg: 1.1rem;
         --ozon-border-radius: 8px;
     }
+        
 
     /* Убираем медиа-запрос для темной темы, т.к. теперь это по умолчанию */
     
@@ -69,7 +70,11 @@ st.markdown("""
     .stTextInput, .stTextArea, .stNumberInput, .stSelectbox {
         color: var(--ozon-text) !important;
     }
-    
+    .responsive-img {
+        max-width: 10%;
+        height: auto;
+        display: block;
+    }
     .stTextInput label, .stTextArea label, .stNumberInput label, .stSelectbox label {
         color: var(--ozon-text) !important;
     }
@@ -429,14 +434,16 @@ def get_csv_download_link(sku_list, filename):
 
 def main():
     # Кастомный заголовок
-    st.markdown('<h1 style="color: #005BFF; font-size: 2.5rem; text-align: center; font-weight: 800;">🛍️ OZON SKU Extractor</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="main-subtitle">Извлекайте SKU из ссылок OZON и любого текста</p>', unsafe_allow_html=True)
+
+    st.markdown('<div style="display: flex; align-items: center; justify-content: center; gap: 12px;"><img src="https://cdn1.ozone.ru/s3/common-image-storage/bx/box-open-ozon-alt_m.png" alt="Коробка Ozon" style="height: 80px; width: 80px; object-fit: contain;"><h1 style="color: #005BFF; font-size: 2.5rem; text-align: center; font-weight: 800; margin: 0; line-height: 1;">OZON SKU Extractor</h1></div>', unsafe_allow_html=True)
+
+    st.markdown('<p class="main-subtitle">Извлекайте SKU из ссылок OZON и любого текста </p>', unsafe_allow_html=True)
     
     # Сайдбар с карточками
     with st.sidebar:
         st.markdown("""
         <div class="ozon-sidebar-header ozon-fade-in">
-            <h3 class="sidebar-title" >ℹ️ Информация</h3>
+            <h3 class="sidebar-title" > Информация</h3>
         </div>
         """, unsafe_allow_html=True)
         
