@@ -375,11 +375,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
-
-
-
-
 def extract_sku_from_text(text):
     """Извлекает SKU из текста"""
     try:
@@ -440,8 +435,33 @@ def get_csv_download_link(sku_list, filename):
 
 def main():
 
+ # Яндекс.Метрика
+    yandex_metrika = """
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js','ym');
 
- 
+        ym(104969939, 'init', {
+            ssr:true,
+            webvisor:true,
+            clickmap:true,
+            ecommerce:"dataLayer",
+            accurateTrackBounce:true,
+            trackLinks:true
+        });
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/104969939" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+    """
+    
+    components.html(yandex_metrika, height=0)
+
+
     # Кастомный заголовок
 
     st.markdown('<div style="display: flex; align-items: center; justify-content: center; gap: 12px;"><img src="https://cdn1.ozone.ru/s3/common-image-storage/bx/box-open-ozon-alt_m.png" alt="Коробка Ozon" style="height: 80px; width: 80px; object-fit: contain;"><h1 style="color: #005BFF; font-size: 2.5rem; text-align: center; font-weight: 800; margin: 0; line-height: 1;">OZON SKU Extractor</h1></div>', unsafe_allow_html=True)
@@ -648,10 +668,3 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
