@@ -387,6 +387,9 @@ def main():
             accurateTrackBounce:true,
             webvisor:true
         });
+        ym(104969939,'reachGoal','extraction_started')
+        ym(104969939,'reachGoal','extraction_success')
+        ym(104969939,'reachGoal','download_clicked')
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/104969939" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     """
