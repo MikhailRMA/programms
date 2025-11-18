@@ -3,6 +3,15 @@ import streamlit as st
 import streamlit.components.v1 as components
 from datetime import datetime, timedelta
 import base64
+import time
+
+# Импортируем selenium-base (работает в Streamlit Cloud)
+try:
+    from seleniumbase import Driver
+    from selenium.webdriver.common.by import By
+    SELENIUM_AVAILABLE = True
+except ImportError:
+    SELENIUM_AVAILABLE = False
 
 # Настройка страницы
 st.set_page_config(
@@ -12,7 +21,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS в стиле OZON
+# CSS в стиле OZON - ТЕМНАЯ ТЕМА ПО УМОЛЧАНИЮ
 st.markdown("""
 <style>
     /* Цветовая гамма OZON - ТЕМНАЯ ТЕМА ПО УМОЛЧАНИЮ */
@@ -37,7 +46,6 @@ st.markdown("""
         --ozon-border-radius: 8px;
     }
         
-
     /* Убираем медиа-запрос для темной темы, т.к. теперь это по умолчанию */
     
     /* Адаптация для планшетов */
@@ -302,7 +310,6 @@ st.markdown("""
         width: 100%;
     }
             
-
     .ozon-download:hover {
         background: #e0104a !important;
         transform: translateY(-2px);
@@ -405,6 +412,94 @@ def extract_sku_from_text(text):
     except Exception as e:
         raise Exception(f"Ошибка при извлечении SKU: {str(e)}")
 
+def extract_sku_from_short_url(url):
+    """Извлекает SKU из короткой ссылки OZON через Selenium"""
+    if not SELENIUM_AVAILABLE:
+        raise Exception("Selenium не доступен. Функция извлечения из коротких ссылок отключена.")
+    
+    try:
+        # Настройка драйвера для Streamlit Cloud
+        driver = Driver(uc=True, headless=True)
+        
+        try:
+            # Переходим по ссылке
+            driver.get(url)
+            
+            # Ждем загрузки страницы (максимум 3 секунды)
+            start_time = time.time()
+            sku = None
+            
+            while time.time() - start_time < 3 and not sku:
+                try:
+                    # Ищем элемент с SKU
+                    sku_element = driver.find_element(By.CSS_SELECTOR, "div[class*='ga5_3_10-a2'][class*='tsBodyControl400Small']")
+                    if sku_element:
+                        sku_text = sku_element.text.strip()
+                        # Извлекаем цифры из текста
+                        sku_match = re.search(r'(\d{9,10})', sku_text)
+                        if sku_match:
+                            sku = sku_match.group(1)
+                            break
+                except:
+                    pass
+                
+                time.sleep(0.1)  # Небольшая пауза между попытками
+            
+            return sku
+            
+        finally:
+            driver.quit()
+            
+    except Exception as e:
+        raise Exception(f"Ошибка при обработке ссылки {url}: {str(e)}")
+
+def process_short_urls(urls_text):
+    """Обрабатывает короткие ссылки и извлекает SKU"""
+    if not SELENIUM_AVAILABLE:
+        return [], "Selenium не доступен. Установите selenium-base для работы с короткими ссылками."
+    
+    # Извлекаем ссылки из текста
+    url_pattern = r'https?://[^\s]+'
+    urls = re.findall(url_pattern, urls_text)
+    
+    # Фильтруем только короткие ссылки OZON
+    short_urls = [url for url in urls if 'ozon.ru/t/' in url or 'ozon.com/t/' in url]
+    
+    if not short_urls:
+        return [], "Не найдено коротких ссылок OZON (формат: https://ozon.ru/t/...)"
+    
+    results = []
+    success_count = 0
+    error_count = 0
+    
+    # Прогресс бар
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    
+    # Обрабатываем ссылки последовательно
+    for i, url in enumerate(short_urls):
+        status_text.text(f"Обрабатывается {i+1}/{len(short_urls)}: {url}")
+        progress_bar.progress((i) / len(short_urls))
+        
+        try:
+            sku = extract_sku_from_short_url(url)
+            if sku:
+                results.append(sku)
+                success_count += 1
+            else:
+                error_count += 1
+        except Exception as e:
+            error_count += 1
+        
+        # Обновляем прогресс
+        progress_bar.progress((i + 1) / len(short_urls))
+    
+    progress_bar.empty()
+    status_text.empty()
+    
+    message = f"Обработано {len(short_urls)} ссылок: ✅ {success_count} успешно, ❌ {error_count} ошибок"
+    return results, message
+
 def create_csv_content(sku_list):
     """Создает содержимое CSV файла"""
     csv_content = ""
@@ -434,8 +529,7 @@ def get_csv_download_link(sku_list, filename):
     return href
 
 def main():
-
-  # Яндекс.Метрика через st.markdown
+    # Яндекс.Метрика через st.markdown
     metrika_code = """
     <script>
         (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -455,9 +549,7 @@ def main():
     
     st.markdown(metrika_code, unsafe_allow_html=True)
 
-
     # Кастомный заголовок
-
     st.markdown('<div style="display: flex; align-items: center; justify-content: center; gap: 12px;"><img src="https://cdn1.ozone.ru/s3/common-image-storage/bx/box-open-ozon-alt_m.png" alt="Коробка Ozon" style="height: 80px; width: 80px; object-fit: contain;"><h1 style="color: #005BFF; font-size: 2.5rem; text-align: center; font-weight: 800; margin: 0; line-height: 1;">OZON SKU Extractor</h1></div>', unsafe_allow_html=True)
 
     st.markdown('<p class="main-subtitle">Извлекайте SKU из ссылок OZON и любого текста </p>', unsafe_allow_html=True)
@@ -532,6 +624,24 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
+        # Новая карточка для коротких ссылок
+        st.markdown("""
+        <div class="ozon-card ozon-fade-in">
+            <div class="card-header">
+                <span class="card-icon">🔗</span>
+                <h4 class="card-title">Короткие ссылки</h4>
+            </div>
+            <div class="ozon-status">
+                <strong>Формат:</strong><br>
+                <code>https://ozon.ru/t/zqi09te</code>
+            </div>
+            <div class="ozon-status">
+                <strong>Ограничение:</strong><br>
+                ~3 сек на ссылку
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
         st.markdown("---")
         st.markdown("""
         <div class="text-center" style="color: var(--ozon-text-muted); padding: 1rem;">
@@ -546,7 +656,9 @@ def main():
         st.markdown('<div class="section-header">📥 Ввод данных</div>', unsafe_allow_html=True)
     
         default_text = """https://www.ozon.ru/product/salfetki-ot-pyaten-na-odezhde-vlazhnye-pyatnovyvodyashchie-sredstvo-ochishchayushchie-1650868905/
+https://ozon.ru/t/zqi09te
 https://www.ozon.ru/product/noutbuk-apple-macbook-air-13-m1-8gb-256gb-space-gray-1234567890/
+https://ozon.ru/t/xYz123ab
 https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
 
 Товары: 9876543210, 555666777, 8889990001."""
@@ -559,8 +671,14 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
             label_visibility="collapsed"
         )
         
-        # Кнопка извлечения
-        extract_btn = st.button("🔍 Извлечь SKU", type="primary", use_container_width=True)
+        # Две кнопки в ряд
+        col1_1, col1_2 = st.columns(2)
+        
+        with col1_1:
+            extract_btn = st.button("🔍 Извлечь SKU из текста", type="primary", use_container_width=True)
+        
+        with col1_2:
+            extract_short_btn = st.button("🔗 Извлечь из коротких ссылок", type="primary", use_container_width=True)
     
     with col2:
         st.markdown('<div class="section-header">📤 Результаты</div>', unsafe_allow_html=True)
@@ -571,7 +689,7 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
         if 'extraction_stats' not in st.session_state:
             st.session_state.extraction_stats = {"found": 0, "duplicates": 0}
         
-        # Обработка извлечения SKU
+        # Обработка извлечения SKU из текста
         if extract_btn:
             if not input_text.strip():
                 st.markdown("""
@@ -581,7 +699,7 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
                 </div>
                 """, unsafe_allow_html=True)
             else:
-                with st.spinner("🔍 Извлекаем SKU..."):
+                with st.spinner("🔍 Извлекаем SKU из текста..."):
                     try:
                         sku_list = extract_sku_from_text(input_text)
                         
@@ -595,6 +713,47 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
                             "duplicates": duplicate_count
                         }
                         
+                    except Exception as e:
+                        st.markdown(f"""
+                        <div class="ozon-alert ozon-alert-error">
+                            <strong>❌ Ошибка</strong><br>
+                            {str(e)}
+                        </div>
+                        """, unsafe_allow_html=True)
+        
+        # Обработка извлечения SKU из коротких ссылок
+        if extract_short_btn:
+            if not input_text.strip():
+                st.markdown("""
+                <div class="ozon-alert ozon-alert-warning">
+                    <strong>⚠️ Внимание</strong><br>
+                    Введите текст с короткими ссылками
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                with st.spinner("🔗 Обрабатываем короткие ссылки..."):
+                    try:
+                        sku_list, message = process_short_urls(input_text)
+                        
+                        if sku_list:
+                            st.session_state.sku_list = sku_list
+                            st.session_state.extraction_stats = {
+                                "found": len(sku_list),
+                                "duplicates": 0
+                            }
+                            
+                            st.markdown(f"""
+                            <div class="ozon-alert ozon-alert-success">
+                                <strong>✅ {message}</strong>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        else:
+                            st.markdown(f"""
+                            <div class="ozon-alert ozon-alert-warning">
+                                <strong>ℹ️ {message}</strong>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
                     except Exception as e:
                         st.markdown(f"""
                         <div class="ozon-alert ozon-alert-error">
@@ -650,14 +809,9 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
         <div class="ozon-status">
             <strong>📝 Из текста:</strong> находит числа 9-10 цифр, не начинающиеся с 0
         </div>
-        """, unsafe_allow_html=True)
-    
-        st.markdown("#### 🔄 Обработка данных")
-    
-        st.markdown("""
-        <div class="ozon-status">✅ <strong>Автоматическое удаление дубликатов</strong> - убирает повторяющиеся SKU</div>
-        <div class="ozon-status">📊 <strong>Сортировка по возрастанию</strong> - упорядочивает SKU для удобства</div>
-        <div class="ozon-status">🔍 <strong>Валидация формата</strong> - проверяет что SKU соответствуют требованиям</div>
+        <div class="ozon-status">
+            <strong>🔗 Из коротких ссылок:</strong> использует Selenium для перехода по ссылке и извлечения SKU со страницы товара
+        </div>
         """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
