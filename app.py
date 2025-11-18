@@ -15,15 +15,13 @@ st.set_page_config(
 # CSS в стиле OZON
 st.markdown("""
 <style>
-    /* Цветовая гамма OZON - ТЕМНАЯ ТЕМА ПО УМОЛЧАНИЮ */
     :root {
         --ozon-primary: #005BFF;
         --ozon-primary-dark: #004ACC;
-        --ozon-primary-light: #3377FF;
         --ozon-secondary: #FF6B00;
-        --ozon-background: #1A1A1A; /* Темный фон по умолчанию */
-        --ozon-surface: #2D2D2D; /* Темные карточки */
-        --ozon-text: #FFFFFF; /* Белый текст */
+        --ozon-background: #1A1A1A;
+        --ozon-surface: #2D2D2D;
+        --ozon-text: #FFFFFF;
         --ozon-text-muted: #B3B3B3;
         --ozon-border: #404040;
         --ozon-shadow: rgba(0, 91, 255, 0.2);
@@ -33,72 +31,37 @@ st.markdown("""
         --ozon-card-padding: 1.2rem;
         --ozon-font-size-base: 1rem;
         --ozon-font-size-sm: 0.9rem;
-        --ozon-font-size-lg: 1.1rem;
         --ozon-border-radius: 8px;
     }
-        
 
-    /* Убираем медиа-запрос для темной темы, т.к. теперь это по умолчанию */
-    
-    /* Адаптация для планшетов */
-    @media (max-width: 1024px) {
-        :root {
-            --ozon-card-padding: 1rem;
-            --ozon-font-size-base: 0.95rem;
-        }
-    }
-    
-    /* Адаптация для мобильных устройств */
-    @media (max-width: 768px) {
-        :root {
-            --ozon-card-padding: 0.9rem;
-            --ozon-font-size-base: 0.9rem;
-            --ozon-font-size-sm: 0.85rem;
-            --ozon-border-radius: 6px;
-        }
-    }
-
-    /* Базовые стили для Streamlit */
-    .main {
+    .main, .stApp {
         background-color: var(--ozon-background) !important;
     }
     
-    .stApp {
-        background-color: var(--ozon-background) !important;
-    }
-    
-    /* Стили для текстовых элементов Streamlit */
     .stTextInput, .stTextArea, .stNumberInput, .stSelectbox {
         color: var(--ozon-text) !important;
     }
-    .responsive-img {
-        max-width: 10%;
-        height: auto;
-        display: block;
-    }
+    
     .stTextInput label, .stTextArea label, .stNumberInput label, .stSelectbox label {
         color: var(--ozon-text) !important;
     }
     
-    /* Заголовки Streamlit */
     h1, h2, h3, h4, h5, h6 {
         color: var(--ozon-text) !important;
     }
     
-    /* Основной контент */
     .main .block-container {
         background-color: var(--ozon-background) !important;
         color: var(--ozon-text) !important;
     }
     
-    /* Базовые стили */
     .main-header {
         font-size: clamp(1.8rem, 5vw, 2.5rem);
         background: linear-gradient(135deg, var(--ozon-primary), var(--ozon-secondary));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        color: var(--ozon-primary); /* Fallback цвет */
+        color: var(--ozon-primary);
         text-align: center;
         margin-bottom: clamp(0.5rem, 2vw, 1rem);
         font-weight: 800;
@@ -113,7 +76,6 @@ st.markdown("""
         line-height: 1.4;
     }
     
-    /* Заголовки разделов */
     .section-header {
         background: url('https://brandlab.ozon.ru/images/tild6365-6165-4064-b161-626431393363__pattern_bg-1.png');
         background-size: cover;
@@ -133,7 +95,6 @@ st.markdown("""
         font-weight: 900 !important;
     }
     
-    /* Карточки в стиле OZON */
     .ozon-card {
         background: var(--ozon-surface);
         padding: var(--ozon-card-padding);
@@ -170,7 +131,6 @@ st.markdown("""
         font-weight: 600;
     }
     
-    /* Элементы статуса */
     .ozon-status {
         background: var(--ozon-surface);
         padding: clamp(0.6rem, 1.5vw, 0.8rem);
@@ -199,7 +159,6 @@ st.markdown("""
         border: 1px solid var(--ozon-border);
     }
     
-    /* Кнопки в стиле OZON */
     .stButton button {
         background: linear-gradient(135deg, var(--ozon-primary), var(--ozon-primary-dark));
         color: white;
@@ -219,7 +178,6 @@ st.markdown("""
         box-shadow: 0 6px 20px var(--ozon-shadow);
     }
     
-    /* Текстовые поля */
     .stTextArea textarea {
         border-radius: var(--ozon-border-radius);
         border: 2px solid var(--ozon-border);
@@ -238,7 +196,6 @@ st.markdown("""
         box-shadow: 0 0 0 3px rgba(0, 91, 255, 0.1);
     }
     
-    /* Уведомления */
     .ozon-alert {
         padding: clamp(0.6rem, 1.5vw, 0.8rem);
         border-radius: var(--ozon-border-radius);
@@ -281,7 +238,6 @@ st.markdown("""
         color: var(--ozon-text);
     }
     
-    /* Ссылки для скачивания */
     .ozon-download {
         display: inline-flex;
         align-items: center;
@@ -302,7 +258,6 @@ st.markdown("""
         width: 100%;
     }
             
-
     .ozon-download:hover {
         background: #e0104a !important;
         transform: translateY(-2px);
@@ -310,7 +265,6 @@ st.markdown("""
         color: white;
     }
     
-    /* Сайдбар */
     .ozon-sidebar-header {
         background:  url('https://brandlab.ozon.ru/images/tild6365-6165-4064-b161-626431393363__pattern_bg-1.png');
         background-size: cover;
@@ -335,7 +289,6 @@ st.markdown("""
         font-weight: 900;
     }
     
-    /* Анимации */
     @keyframes ozonFadeIn {
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
@@ -355,7 +308,6 @@ st.markdown("""
         animation: ozonPulse 2s infinite;
     }
     
-    /* Утилиты */
     .text-center { text-align: center; }
     .text-success { color: var(--ozon-success); }
     .text-warning { color: var(--ozon-warning); }
@@ -363,33 +315,20 @@ st.markdown("""
     .text-primary { color: var(--ozon-primary); }
     .mb-1 { margin-bottom: 0.5rem; }
     .mb-2 { margin-bottom: 1rem; }
-    
-    /* Специальные стили для очень маленьких экранов */
-    @media (max-width: 360px) {
-        .card-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.3rem;
-        }
-    }
 </style>
 """, unsafe_allow_html=True)
 
 def extract_sku_from_text(text):
     """Извлекает SKU из текста"""
     try:
-        # Ищем SKU в ссылках (между '-' и '/')
         pattern_links = r'-(\d{9,10})/'
         sku_from_links = re.findall(pattern_links, text)
         
-        # Ищем SKU в любом тексте (9-10 цифр, не начинающихся с 0)
         pattern_anywhere = r'(?<!\d)([1-9]\d{8,9})(?!\d)'
         sku_from_text = re.findall(pattern_anywhere, text)
         
-        # Объединяем оба списка
         all_sku = sku_from_links + sku_from_text
         
-        # Удаляем дубликаты и проверяем валидность SKU
         unique_sku = []
         seen_sku = set()
         
@@ -398,7 +337,6 @@ def extract_sku_from_text(text):
                 unique_sku.append(sku)
                 seen_sku.add(sku)
         
-        # Сортируем для удобства
         unique_sku.sort()
         return unique_sku
         
@@ -426,7 +364,8 @@ def get_csv_download_link(sku_list, filename):
         <div class="ozon-status">
     ✅ Успешно извлечено SKU: <strong>{len(sku_list)}</strong>
         </div>
-        <a class="ozon-download ozon-pulse" href="data:file/csv;base64,{b64}" download="{filename}">
+        <a class="ozon-download ozon-pulse" href="data:file/csv;base64,{b64}" download="{filename}" 
+           onclick="if(typeof ym!=='undefined')ym(104969939,'reachGoal','download_clicked')">
             📥 Скачать CSV файл
         </a>
     </div>
@@ -434,8 +373,7 @@ def get_csv_download_link(sku_list, filename):
     return href
 
 def main():
-
-  # Яндекс.Метрика через st.markdown
+    # Яндекс.Метрика
     metrika_code = """
     <script>
         (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -455,14 +393,11 @@ def main():
     
     st.markdown(metrika_code, unsafe_allow_html=True)
 
-
-    # Кастомный заголовок
-
+    # Заголовок
     st.markdown('<div style="display: flex; align-items: center; justify-content: center; gap: 12px;"><img src="https://cdn1.ozone.ru/s3/common-image-storage/bx/box-open-ozon-alt_m.png" alt="Коробка Ozon" style="height: 80px; width: 80px; object-fit: contain;"><h1 style="color: #005BFF; font-size: 2.5rem; text-align: center; font-weight: 800; margin: 0; line-height: 1;">OZON SKU Extractor</h1></div>', unsafe_allow_html=True)
-
     st.markdown('<p class="main-subtitle">Извлекайте SKU из ссылок OZON и любого текста </p>', unsafe_allow_html=True)
     
-    # Сайдбар с карточками
+    # Сайдбар
     with st.sidebar:
         st.markdown("""
         <div class="ozon-sidebar-header ozon-fade-in">
@@ -470,7 +405,6 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
-        # Карточка "Формат SKU"
         st.markdown("""
         <div class="ozon-card ozon-fade-in">
             <div class="card-header">
@@ -488,7 +422,6 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
-        # Карточка "Примеры SKU"
         st.markdown("""
         <div class="ozon-card ozon-fade-in">
             <div class="card-header">
@@ -510,28 +443,6 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
-        # Карточка "Быстрые клавиши"
-        st.markdown("""
-        <div class="ozon-card ozon-fade-in">
-            <div class="card-header">
-                <span class="card-icon">🚀</span>
-                <h4 class="card-title">Быстрые клавиши</h4>
-            </div>
-            <div class="ozon-status">
-                <strong>Ctrl+A</strong> - Выделить все
-            </div>
-            <div class="ozon-status">
-                <strong>Ctrl+C</strong> - Копировать
-            </div>
-            <div class="ozon-status">
-                <strong>Ctrl+V</strong> - Вставить
-            </div>
-            <div class="ozon-status">
-                <strong>Ctrl+Z</strong> - Отменить
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
         st.markdown("---")
         st.markdown("""
         <div class="text-center" style="color: var(--ozon-text-muted); padding: 1rem;">
@@ -539,7 +450,7 @@ def main():
         </div>
         """, unsafe_allow_html=True)
     
-    # Адаптивная основная область
+    # Основная область
     col1, col2 = st.columns([1, 1], gap="medium")
     
     with col1:
@@ -559,19 +470,16 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
             label_visibility="collapsed"
         )
         
-        # Кнопка извлечения
         extract_btn = st.button("🔍 Извлечь SKU", type="primary", use_container_width=True)
     
     with col2:
         st.markdown('<div class="section-header">📤 Результаты</div>', unsafe_allow_html=True)
         
-        # Инициализация session state
         if 'sku_list' not in st.session_state:
             st.session_state.sku_list = []
         if 'extraction_stats' not in st.session_state:
             st.session_state.extraction_stats = {"found": 0, "duplicates": 0}
         
-        # Обработка извлечения SKU
         if extract_btn:
             if not input_text.strip():
                 st.markdown("""
@@ -583,9 +491,11 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
             else:
                 with st.spinner("🔍 Извлекаем SKU..."):
                     try:
+                        # Отправка события в метрику
+                        st.markdown("<script>if(typeof ym!=='undefined')ym(104969939,'reachGoal','extraction_started')</script>", unsafe_allow_html=True)
+                        
                         sku_list = extract_sku_from_text(input_text)
                         
-                        # Статистика
                         original_count = len(re.findall(r'-(\d{9,10})/', input_text)) + len(re.findall(r'(?<!\d)([1-9]\d{8,9})(?!\d)', input_text))
                         duplicate_count = original_count - len(sku_list)
                         
@@ -595,6 +505,9 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
                             "duplicates": duplicate_count
                         }
                         
+                        # Отправка события об успехе
+                        st.markdown("<script>if(typeof ym!=='undefined')ym(104969939,'reachGoal','extraction_success')</script>", unsafe_allow_html=True)
+                        
                     except Exception as e:
                         st.markdown(f"""
                         <div class="ozon-alert ozon-alert-error">
@@ -603,11 +516,9 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
                         </div>
                         """, unsafe_allow_html=True)
         
-        # Отображение результатов
         if st.session_state.sku_list:
             stats = st.session_state.extraction_stats
     
-            # Статистика
             duplicate_info = f'<div class="ozon-status">♻️ Удалено дубликатов: <strong>{stats["duplicates"]}</strong></div>' if stats["duplicates"] > 0 else ''
     
             st.markdown(f"""
@@ -620,7 +531,6 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
              </div>
             """, unsafe_allow_html=True)
     
-            # Карточка с результатами
             st.markdown("""
             <div class="ozon-card ozon-fade-in">
                 <div class="card-header">
@@ -633,32 +543,10 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
             result_text = "\n".join(st.session_state.sku_list)
             st.text_area("**Список извлеченных SKU:**", value=result_text, height=200, key="results", label_visibility="collapsed")
     
-            # Скачивание
             if st.session_state.sku_list:
                 timestamp = (datetime.now() + timedelta(hours=3)).strftime("%d-%m-%Y_%H-%M-%S")
                 filename = f"ozon_sku_{timestamp}.csv"
                 st.markdown(get_csv_download_link(st.session_state.sku_list, filename), unsafe_allow_html=True)
-
-    # Дополнительная информация
-    with st.expander("📊 Подробнее о работе приложения", expanded=False):
-        st.markdown("#### 🔧 Как работает извлечение")
-    
-        st.markdown("""
-        <div class="ozon-status">
-            <strong>📎 Из ссылок OZON:</strong> ищет паттерн <code>-1650868905/</code> в URL
-        </div>
-        <div class="ozon-status">
-            <strong>📝 Из текста:</strong> находит числа 9-10 цифр, не начинающиеся с 0
-        </div>
-        """, unsafe_allow_html=True)
-    
-        st.markdown("#### 🔄 Обработка данных")
-    
-        st.markdown("""
-        <div class="ozon-status">✅ <strong>Автоматическое удаление дубликатов</strong> - убирает повторяющиеся SKU</div>
-        <div class="ozon-status">📊 <strong>Сортировка по возрастанию</strong> - упорядочивает SKU для удобства</div>
-        <div class="ozon-status">🔍 <strong>Валидация формата</strong> - проверяет что SKU соответствуют требованиям</div>
-        """, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
