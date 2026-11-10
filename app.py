@@ -3,6 +3,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 from datetime import datetime, timedelta
 import base64
+from urllib.parse import urlparse
 
 # Настройка страницы
 st.set_page_config(
@@ -318,27 +319,47 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-def extract_sku_from_text(text):
-    """Извлекает SKU из текста"""
+def extract_sku_from_text(text: str):
+    """
+    Двухэтапное извлечение SKU:
+    1. Из каждой ссылки OZON берется ровно одно значение — последнее число перед завершающим слэшем
+       или концом пути (игнорируя родительские ID склеек). Ссылка удаляется из текста.
+    2. Из оставшегося текста извлекаются ВСЕ валидные артикулы (9-10 цифр, не с 0).
+    Возвращает:
+      - unique_sku: отсортированный список уникальных SKU
+      - raw_count: общее количество найденных кандидатов до дедупликации
+    """
     try:
-        pattern_links = r'-(\d{9,10})/'
-        sku_from_links = re.findall(pattern_links, text)
+        extracted_skus = []
         
-        pattern_anywhere = r'(?<!\d)([1-9]\d{8,9})(?!\d)'
-        sku_from_text = re.findall(pattern_anywhere, text)
+        # 1. Поиск ссылок на карточки товаров Ozon
+        ozon_url_pattern = r'https?://(?:www\.)?ozon\.ru/product/[^\s"\'<>]+'
+        found_urls = re.findall(ozon_url_pattern, text, flags=re.IGNORECASE)
         
-        all_sku = sku_from_links + sku_from_text
+        clean_text = text
         
-        unique_sku = []
-        seen_sku = set()
+        for url in found_urls:
+            # Отрезаем query-параметры (?asb=...), если они есть
+            parsed_path = urlparse(url).path
+            
+            # Ищем последнее числовое значение из 9-10 цифр после дефиса.
+            # Слэш на конце опционален: (?=/|$) ловит как / так и конец пути
+            match = re.search(r'-([1-9]\d{8,9})(?:/|$)', parsed_path)
+            if match:
+                extracted_skus.append(match.group(1))
+            
+            # Вырезаем ссылку целиком, чтобы родительские ID (4091214783) не попали в свободный текст
+            clean_text = clean_text.replace(url, ' ')
         
-        for sku in all_sku:
-            if sku.isdigit() and sku not in seen_sku:
-                unique_sku.append(sku)
-                seen_sku.add(sku)
+        # 2. Поиск всех артикулов в оставшемся свободном тексте
+        pattern_text = r'(?<!\d)([1-9]\d{8,9})(?!\d)'
+        text_skus = re.findall(pattern_text, clean_text)
+        extracted_skus.extend(text_skus)
         
-        unique_sku.sort()
-        return unique_sku
+        raw_count = len(extracted_skus)
+        unique_sku = sorted(list(set(extracted_skus)))
+        
+        return unique_sku, raw_count
         
     except Exception as e:
         raise Exception(f"Ошибка при извлечении SKU: {str(e)}")
@@ -416,11 +437,11 @@ def main():
             </div>
             <div class="ozon-status">
                 <strong>Из ссылок OZON:</strong><br>
-                <code>...-1650868905/...</code>
+                Строго 1 артикул карточки (последнее число после дефиса, включая склейки и URL без слэша)
             </div>
             <div class="ozon-status">
                 <strong>Из текста:</strong><br>
-                9-10 цифр, не начинается с 0
+                Все числа длиной 9-10 цифр, не начинающиеся с 0
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -433,8 +454,9 @@ def main():
             </div>
             <div class="ozon-status text-success">
                 <strong>✅ Валидные:</strong><br>
+                <code>...-4091214783-6179307890/</code> → <code>6179307890</code><br>
+                <code>...-987654321</code> (без слэша)<br>
                 <code>1650868905</code><br>
-                <code>123456789</code><br>
                 <code>9876543210</code>
             </div>
             <div class="ozon-status text-error">
@@ -460,8 +482,8 @@ def main():
         st.markdown('<div class="section-header">📥 Ввод данных</div>', unsafe_allow_html=True)
     
         default_text = """https://www.ozon.ru/product/salfetki-ot-pyaten-na-odezhde-vlazhnye-pyatnovyvodyashchie-sredstvo-ochishchayushchie-1650868905/
-https://www.ozon.ru/product/noutbuk-apple-macbook-air-13-m1-8gb-256gb-space-gray-1234567890/
-https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
+https://ozon.ru/product/yuedongze-elektricheskiy-chaynik-4091214783-6179307890/
+https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321
 
 Товары: 9876543210, 555666777, 8889990001."""
     
@@ -497,10 +519,8 @@ https://www.ozon.ru/product/telefon-samsung-galaxy-s21-987654321/
                         # Отправка события в метрику
                         st.markdown("<script>if(typeof ym!=='undefined')ym(104969939,'reachGoal','extraction_started')</script>", unsafe_allow_html=True)
                         
-                        sku_list = extract_sku_from_text(input_text)
-                        
-                        original_count = len(re.findall(r'-(\d{9,10})/', input_text)) + len(re.findall(r'(?<!\d)([1-9]\d{8,9})(?!\d)', input_text))
-                        duplicate_count = original_count - len(sku_list)
+                        sku_list, raw_count = extract_sku_from_text(input_text)
+                        duplicate_count = raw_count - len(sku_list)
                         
                         st.session_state.sku_list = sku_list
                         st.session_state.extraction_stats = {
