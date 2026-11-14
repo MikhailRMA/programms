@@ -321,37 +321,40 @@ st.markdown("""
 
 def extract_sku_from_text(text: str):
     """
-    Двухэтапное извлечение SKU:
-    1. Из каждой ссылки OZON берется ровно одно значение — последнее число перед завершающим слэшем
-       или концом пути (игнорируя родительские ID склеек). Ссылка удаляется из текста.
-    2. Из оставшегося текста извлекаются ВСЕ валидные артикулы (9-10 цифр, не с 0).
-    Возвращает:
-      - unique_sku: отсортированный список уникальных SKU
-      - raw_count: общее количество найденных кандидатов до дедупликации
+    Надежное извлечение SKU из любых комбинаций ссылок и обычного текста:
+    1. Находит ссылки OZON (/product/), строго ограничивая их границу (не захватывая прилипший текст).
+       Из каждой ссылки берет 1 SKU (последнее 9-10-значное число в пути).
+    2. Вырезает сами ссылки, оставляя весь окружающий и прилипший текст нетронутым.
+    3. Извлекает абсолютно все 9-10-значные числа из оставшегося обычного текста.
     """
     try:
         extracted_skus = []
         
-        # 1. Поиск ссылок на карточки товаров Ozon
-        ozon_url_pattern = r'https?://(?:www\.)?ozon\.ru/product/[^\s"\'<>]+'
-        found_urls = re.findall(ozon_url_pattern, text, flags=re.IGNORECASE)
+        # 1. Ищем ссылки /product/. 
+        # Шаблон ищет путь карточки до конца SKU (9-10 цифр) + опциональный слэш + опциональный хвост параметров (?...)
+        # При этом если после ?sh=XXXXXXXXXX идут цифры без пробела — они НЕ считаются частью ссылки.
+        product_url_pattern = (
+            r'https?://(?:www\.)?ozon\.ru/product/'
+            r'[a-zA-Z0-9_-]*?-([1-9]\d{8,9})/?'
+            r'(?:\?(?:sh=[a-zA-Z0-9_-]{10}|[^\s"\'<>0-9]*))?'
+        )
         
         clean_text = text
         
-        for url in found_urls:
-            # Отрезаем query-параметры (?asb=...), если они есть
-            parsed_path = urlparse(url).path
+        # Проходим по всем найденным ссылкам на товары
+        for match in re.finditer(product_url_pattern, text, flags=re.IGNORECASE):
+            full_url = match.group(0)
+            target_sku = match.group(1)
             
-            # Ищем последнее числовое значение из 9-10 цифр после дефиса.
-            # Слэш на конце опционален: (?=/|$) ловит как / так и конец пути
-            match = re.search(r'-([1-9]\d{8,9})(?:/|$)', parsed_path)
-            if match:
-                extracted_skus.append(match.group(1))
+            extracted_skus.append(target_sku)
+            # Вырезаем только саму ссылку, сохраняя весь прилипший текст и соседние числа
+            clean_text = clean_text.replace(full_url, ' ', 1)
             
-            # Вырезаем ссылку целиком, чтобы родительские ID (4091214783) не попали в свободный текст
-            clean_text = clean_text.replace(url, ' ')
+        # 2. Вырезаем служебные ссылки (/seller/, /brand/, /category/), чтобы не цеплять их ID
+        other_ozon_urls = r'https?://(?:www\.)?ozon\.ru/(?:seller|brand|category|highlight)/[a-zA-Z0-9_/-]+(?:\?[^\s"\'<>]*)?'
+        clean_text = re.sub(other_ozon_urls, ' ', clean_text, flags=re.IGNORECASE)
         
-        # 2. Поиск всех артикулов в оставшемся свободном тексте
+        # 3. Извлекаем ВСЕ валидные SKU из оставшегося обычного текста
         pattern_text = r'(?<!\d)([1-9]\d{8,9})(?!\d)'
         text_skus = re.findall(pattern_text, clean_text)
         extracted_skus.extend(text_skus)
